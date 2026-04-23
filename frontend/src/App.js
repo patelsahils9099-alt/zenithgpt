@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { supabase } from './supabaseClient';
+import Auth from './Auth';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -7,6 +9,14 @@ import { Menu, Edit3, Plus, Mic, ArrowUp, MoreHorizontal, Copy, RefreshCw, Check
 import './App.css';
 
 function App() {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+        <div className="app">return () => subscription.unsubscribe();
+  }, []);
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,7 +42,7 @@ function App() {
     const closeMenu = () => setMenuOpenId(null);
     if (menuOpenId) {
       document.addEventListener('click', closeMenu);
-      return () => document.removeEventListener('click', closeMenu);
+          <div className="app">return () => document.removeEventListener('click', closeMenu);
     }
   }, [menuOpenId]);
 
@@ -161,6 +171,8 @@ function App() {
     { icon: <Pencil size={18} />, title: 'Help me write', text: 'a professional email' },
     { icon: <Heart size={18} />, title: 'Give me advice', text: 'on healthy habits' }
   ];
+    
+      <div className="app">if (!session) return <Auth />;
 
   return (
     <div className="app">
@@ -207,10 +219,10 @@ function App() {
             </div>
           )}
           <div className="profile">
-            <div className="avatar">S</div>
+            <div className="avatar">{session?.user?.email?.[0]?.toUpperCase() || 'U'}</div>
             <div className="profile-info">
-              <p>Sahil Patel</p>
-              <small>Free plan</small>
+              <p>{session?.user?.email?.split('@')[0] || 'User'}</p>
+              <button onClick={() => supabase.auth.signOut()} className="logout-btn">Log out</button>
             </div>
           </div>
         </div>
