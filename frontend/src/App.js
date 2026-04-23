@@ -14,7 +14,7 @@ function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
-        <div className="app">return () => subscription.unsubscribe();
+        return () => subscription.unsubscribe();
   }, []);
 
   const [messages, setMessages] = useState([]);
@@ -42,7 +42,7 @@ function App() {
     const closeMenu = () => setMenuOpenId(null);
     if (menuOpenId) {
       document.addEventListener('click', closeMenu);
-          <div className="app">return () => document.removeEventListener('click', closeMenu);
+          return () => document.removeEventListener('click', closeMenu);
     }
   }, [menuOpenId]);
 
