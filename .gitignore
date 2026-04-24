@@ -7,3 +7,5 @@ build/
 dist/
 frontend/build/
 frontend/node_modules/
+*.backup
+*.broken

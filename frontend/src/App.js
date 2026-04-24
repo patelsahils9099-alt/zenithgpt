@@ -247,7 +247,6 @@ function App() {
             <div className="avatar-small">{session?.user?.email?.[0]?.toUpperCase() || 'U'}</div>
           </div>
         </div>
-        </div>
         <div className="chat-container">
           {messages.length === 0 ? (
             <div className="welcome">
