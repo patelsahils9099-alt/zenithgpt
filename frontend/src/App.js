@@ -10,13 +10,6 @@ import './App.css';
 
 function App() {
   const [session, setSession] = useState(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
-        return () => subscription.unsubscribe();
-  }, []);
-
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,6 +24,12 @@ function App() {
   const API_URL = 'https://zenithgpt-backend.onrender.com';
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
     if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -42,7 +41,7 @@ function App() {
     const closeMenu = () => setMenuOpenId(null);
     if (menuOpenId) {
       document.addEventListener('click', closeMenu);
-          return () => document.removeEventListener('click', closeMenu);
+      return () => document.removeEventListener('click', closeMenu);
     }
   }, [menuOpenId]);
 
@@ -171,8 +170,8 @@ function App() {
     { icon: <Pencil size={18} />, title: 'Help me write', text: 'a professional email' },
     { icon: <Heart size={18} />, title: 'Give me advice', text: 'on healthy habits' }
   ];
-    
-      <div className="app">if (!session) return <Auth />;
+
+  if (!session) return <Auth />;
 
   return (
     <div className="app">
@@ -233,7 +232,7 @@ function App() {
           {!sidebarOpen && <button className="icon-btn" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>}
           <div className="app-title">ZenithGPT</div>
           <div className="top-right">
-            <div className="avatar-small">S</div>
+            <div className="avatar-small">{session?.user?.email?.[0]?.toUpperCase() || 'U'}</div>
           </div>
         </div>
 
@@ -258,7 +257,7 @@ function App() {
               {messages.map((m, i) => (
                 <div key={i} className={'message-row ' + m.role}>
                   <div className="message-avatar">
-                    {m.role === 'user' ? 'S' : 'Z'}
+                    {m.role === 'user' ? (session?.user?.email?.[0]?.toUpperCase() || 'U') : 'Z'}
                   </div>
                   <div className="message-content">
                     {m.role === 'assistant' ? (
@@ -333,8 +332,6 @@ function App() {
           <p className="footer-text">ZenithGPT can make mistakes. Check important info.</p>
         </div>
       </div>
-    </div>
-    </div>
     </div>
   );
 }
