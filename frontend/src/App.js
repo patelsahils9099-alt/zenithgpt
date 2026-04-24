@@ -20,13 +20,16 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-
-  if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
-}, [messages]);useEffect(() => {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
-}, [theme]);
   const endRef = useRef(null);
+
+  useEffect(() => {
+    if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const API_URL = 'https://zenithgpt-backend.onrender.com';
 
