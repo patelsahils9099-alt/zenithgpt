@@ -19,6 +19,13 @@ function App() {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
+}, [messages]);useEffect(() => {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+}, [theme]);
   const endRef = useRef(null);
 
   const API_URL = 'https://zenithgpt-backend.onrender.com';
@@ -226,16 +233,18 @@ function App() {
           </div>
         </div>
       )}
-
       <div className="main">
         <div className="top-bar">
           {!sidebarOpen && <button className="icon-btn" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>}
           <div className="app-title">ZenithGPT</div>
           <div className="top-right">
+            <button className="icon-btn" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
             <div className="avatar-small">{session?.user?.email?.[0]?.toUpperCase() || 'U'}</div>
           </div>
         </div>
-
+        </div>
         <div className="chat-container">
           {messages.length === 0 ? (
             <div className="welcome">
