@@ -21,16 +21,21 @@ app.add_middleware(
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
-class ChatRequest(BaseModel):
-    message: str
+class SaveChatRequest(BaseModel):
+    conversation_id: Optional[str] = None
+    title: str
+    messages: list
     mode: str = "general"
-    history: list = []
+    user_id: Optional[str] = None
 
 class ChatResponse(BaseModel):
     reply: str
     error: Optional[str] = None
 
-class SaveChatRequest(BaseModel):
+    conversation_id: Optional[str] = None
+    title: str
+    messages: list
+    mode: str = "general"class SaveChatRequest(BaseModel):
     conversation_id: Optional[str] = None
     title: str
     messages: list
@@ -78,20 +83,33 @@ async def save_chat(request: SaveChatRequest):
                 "title": request.title,
                 "mode": request.mode
             }).eq("id", request.conversation_id).execute()
-        else:
-            result = supabase.table("conversations").insert({
+                    result = supabase.table("conversations").insert({
                 "title": request.title,
                 "messages": request.messages,
                 "mode": request.mode
+            }).execute()else:
+            result = supabase.table("conversations").insert({
+                "title": request.title,
+                "messages": request.messages,
+                "mode": request.mode,
+                "user_id": request.user_id
             }).execute()
         return {"success": True, "data": result.data}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-@app.get("/conversations")
 async def get_conversations():
     try:
-       result = supabase.table("conversations").select("*").order("updated_at", desc=True).execute()
+        result = supabase.table("conversations").select("*").order("updated_at", desc=True).execute()
+        return {"conversations": result.data}
+    except Exception as e:
+        return {"conversations": [], "error": str(e)}@app.get("/conversations")
+async def get_conversations():
+    try:
+        query = supabase.table("conversations").select("*").order("updated_at", desc=True)
+        if user_id:
+            query = query.eq("user_id", user_id)
+        result = query.execute()
         return {"conversations": result.data}
     except Exception as e:
         return {"conversations": [], "error": str(e)}

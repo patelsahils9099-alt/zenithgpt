@@ -23,6 +23,10 @@ function App() {
   const endRef = useRef(null);
 
   useEffect(() => {
+    if (session) loadConversations();
+  }, [session]);
+
+  useEffect(() => {
     if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -55,9 +59,15 @@ function App() {
     }
   }, [menuOpenId]);
 
-  const loadConversations = async () => {
-    try {
+      try {
       const r = await fetch(API_URL + '/conversations');
+      const d = await r.json();
+      setConversations(d.conversations || []);
+    } catch (e) {}
+  };const loadConversations = async () => {
+    if (!session?.user?.id) return;
+    try {
+      const r = await fetch(API_URL + '/conversations?user_id=' + session.user.id);
       const d = await r.json();
       setConversations(d.conversations || []);
     } catch (e) {}
@@ -71,7 +81,7 @@ function App() {
       const r = await fetch(API_URL + '/save-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversation_id: currentId, title: title, messages: msgs, mode: mode })
+      body: JSON.stringify({ conversation_id: currentId, title: title, messages: msgs, mode: mode, user_id: session?.user?.id })
       });
       const d = await r.json();
       if (d.success && d.data && d.data[0]) setCurrentId(d.data[0].id);
