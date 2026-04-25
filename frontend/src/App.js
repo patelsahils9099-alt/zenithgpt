@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import Auth from './Auth';
+import Privacy from './Privacy';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -20,6 +20,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [showPrivacy, setShowPrivacy] = useState(false);  
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -182,7 +183,7 @@ function App() {
     { icon: <Pencil size={18} />, title: 'Help me write', text: 'a professional email' },
     { icon: <Heart size={18} />, title: 'Give me advice', text: 'on healthy habits' }
   ];
-
+  if (showPrivacy) return <Privacy onBack={() => setShowPrivacy(false)} />;
   if (!session) return <Auth />;
 
   return (
@@ -233,6 +234,7 @@ function App() {
             <div className="avatar">{session?.user?.email?.[0]?.toUpperCase() || 'U'}</div>
             <div className="profile-info">
               <p>{session?.user?.email?.split('@')[0] || 'User'}</p>
+              <button onClick={() => setShowPrivacy(true)} className="logout-btn">Privacy Policy</button>
               <button onClick={() => supabase.auth.signOut()} className="logout-btn">Log out</button>
             </div>
           </div>
