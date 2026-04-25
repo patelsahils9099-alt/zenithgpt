@@ -24,6 +24,7 @@ function App() {
 
   useEffect(() => {
     if (session) loadConversations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   useEffect(() => {
@@ -46,10 +47,6 @@ function App() {
   useEffect(() => {
     if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  useEffect(() => {
-    loadConversations();
-  }, []);
 
   useEffect(() => {
     const closeMenu = () => setMenuOpenId(null);
