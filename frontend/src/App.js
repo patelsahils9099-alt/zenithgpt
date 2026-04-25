@@ -59,12 +59,7 @@ function App() {
     }
   }, [menuOpenId]);
 
-      try {
-      const r = await fetch(API_URL + '/conversations');
-      const d = await r.json();
-      setConversations(d.conversations || []);
-    } catch (e) {}
-  };const loadConversations = async () => {
+  const loadConversations = async () => {
     if (!session?.user?.id) return;
     try {
       const r = await fetch(API_URL + '/conversations?user_id=' + session.user.id);
