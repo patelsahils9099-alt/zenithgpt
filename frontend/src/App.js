@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from './supabaseClient';
+import Auth from './Auth';
 import Privacy from './Privacy';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
