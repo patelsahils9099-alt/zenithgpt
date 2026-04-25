@@ -137,6 +137,14 @@ async def delete_conversation(conversation_id: str):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+@app.delete("/delete-account/{user_id}")
+async def delete_account(user_id: str):
+    try:
+        supabase.table("conversations").delete().eq("user_id", user_id).execute()
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
