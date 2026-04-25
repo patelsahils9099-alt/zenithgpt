@@ -190,7 +190,35 @@ const sendMessage = async (customInput) => {
       conversations: d.conversations
     };
 
-    const deleteAccount = async () => {
+const exportData = async () => {
+    const r = await fetch(API_URL + '/conversations?user_id=' + session.user.id);
+    const d = await r.json();
+    const data = {
+      email: session.user.email,
+      exported_at: new Date().toISOString(),
+      conversations: d.conversations
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'zenithgpt-data-' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const deleteAccount = async () => {
+    if (!window.confirm('Are you sure? This will delete ALL your chats permanently!')) return;
+    if (!window.confirm('Last warning: This action cannot be undone. Continue?')) return;
+    try {
+      await fetch(API_URL + '/delete-account/' + session.user.id, { method: 'DELETE' });
+      await supabase.auth.signOut();
+      alert('Your account data has been deleted.');
+    } catch (e) {
+      alert('Error deleting account.');
+    }
+  };
+
     if (!window.confirm('Are you sure? This will delete ALL your chats permanently!')) return;
     if (!window.confirm('Last warning: This action cannot be undone. Continue?')) return;
     try {
