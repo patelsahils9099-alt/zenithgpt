@@ -21,22 +21,8 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  const [showPrivacy, setShowPrivacy] = useState(false);  
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const endRef = useRef(null);
-
-  useEffect(() => {
-    if (session) loadConversations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
-
-  useEffect(() => {
-    if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   const API_URL = 'https://zenithgpt-backend.onrender.com';
 
@@ -47,8 +33,17 @@ function App() {
   }, []);
 
   useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     if (endRef.current) endRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (session) loadConversations();
+  }, [session]);
 
   useEffect(() => {
     const closeMenu = () => setMenuOpenId(null);
@@ -75,7 +70,7 @@ function App() {
       const r = await fetch(API_URL + '/save-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversation_id: currentId, title: title, messages: msgs, mode: mode, user_id: session?.user?.id })
+        body: JSON.stringify({ conversation_id: currentId, title: title, messages: msgs, mode: mode, user_id: session?.user?.id })
       });
       const d = await r.json();
       if (d.success && d.data && d.data[0]) setCurrentId(d.data[0].id);
@@ -83,7 +78,7 @@ function App() {
     } catch (e) {}
   };
 
-const sendMessage = async (customInput) => {
+  const sendMessage = async (customInput) => {
     const messageText = customInput || input;
     if (!messageText.trim() || loading) return;
     const userMsg = { role: 'user', content: messageText };
@@ -91,20 +86,16 @@ const sendMessage = async (customInput) => {
     setMessages(newMsgs);
     setInput('');
     setLoading(true);
-    
     try {
       const response = await fetch(API_URL + '/chat-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: messageText, mode: mode, history: messages })
       });
-      
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantMsg = '';
-      
       setMessages([...newMsgs, { role: 'assistant', content: '' }]);
-      
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -112,7 +103,6 @@ const sendMessage = async (customInput) => {
         assistantMsg += chunk;
         setMessages([...newMsgs, { role: 'assistant', content: assistantMsg }]);
       }
-      
       const final = [...newMsgs, { role: 'assistant', content: assistantMsg }];
       saveChat(final);
     } catch (e) {
@@ -128,21 +118,7 @@ const sendMessage = async (customInput) => {
     const lastUser = withoutLast[withoutLast.length - 1];
     if (lastUser.role !== 'user') return;
     setMessages(withoutLast);
-    setLoading(true);
-    try {
-      const r = await fetch(API_URL + '/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: lastUser.content, mode: mode, history: withoutLast.slice(0, -1) })
-      });
-      const d = await r.json();
-      if (d.reply) {
-        const final = [...withoutLast, { role: 'assistant', content: d.reply }];
-        setMessages(final);
-        saveChat(final);
-      }
-    } catch (e) {}
-    setLoading(false);
+    sendMessage(lastUser.content);
   };
 
   const copyMessage = (text, idx) => {
@@ -181,16 +157,14 @@ const sendMessage = async (customInput) => {
     loadConversations();
   };
 
-  const exportData = async () => {
-    const r = await fetch(API_URL + '/conversations?user_id=' + session.user.id);
-    const d = await r.json();
-    const data = {
-      email: session.user.email,
-      exported_at: new Date().toISOString(),
-      conversations: d.conversations
-    };
+  const deleteChat = async (id) => {
+    if (!window.confirm('Delete this chat?')) return;
+    await fetch(API_URL + '/conversations/' + id, { method: 'DELETE' });
+    if (currentId === id) { setMessages([]); setCurrentId(null); }
+    loadConversations();
+  };
 
-const exportData = async () => {
+  const exportData = async () => {
     const r = await fetch(API_URL + '/conversations?user_id=' + session.user.id);
     const d = await r.json();
     const data = {
@@ -219,39 +193,13 @@ const exportData = async () => {
     }
   };
 
-    if (!window.confirm('Are you sure? This will delete ALL your chats permanently!')) return;
-    if (!window.confirm('Last warning: This action cannot be undone. Continue?')) return;
-    try {
-      await fetch(API_URL + '/delete-account/' + session.user.id, { method: 'DELETE' });
-      await supabase.auth.signOut();
-      alert('Your account data has been deleted.');
-    } catch (e) {
-      alert('Error deleting account.');
-    }
-  };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'zenithgpt-data-' + new Date().toISOString().split('T')[0] + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const deleteChat = async (id) => {
-    if (!window.confirm('Delete this chat?')) return;
-    await fetch(API_URL + '/conversations/' + id, { method: 'DELETE' });
-    if (currentId === id) { setMessages([]); setCurrentId(null); }
-    loadConversations();
-  };
-
   const suggestions = [
     { icon: <Sparkles size={18} />, title: 'Brainstorm ideas', text: 'for a weekend project' },
     { icon: <Code size={18} />, title: 'Write code', text: 'to parse a CSV file' },
     { icon: <Pencil size={18} />, title: 'Help me write', text: 'a professional email' },
     { icon: <Heart size={18} />, title: 'Give me advice', text: 'on healthy habits' }
   ];
+
   if (showPrivacy) return <Privacy onBack={() => setShowPrivacy(false)} />;
   if (!session) return <Auth />;
 
@@ -311,6 +259,7 @@ const exportData = async () => {
           </div>
         </div>
       )}
+
       <div className="main">
         <div className="top-bar">
           {!sidebarOpen && <button className="icon-btn" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>}
@@ -322,6 +271,7 @@ const exportData = async () => {
             <div className="avatar-small">{session?.user?.email?.[0]?.toUpperCase() || 'U'}</div>
           </div>
         </div>
+
         <div className="chat-container">
           {messages.length === 0 ? (
             <div className="welcome">
@@ -384,7 +334,7 @@ const exportData = async () => {
                   </div>
                 </div>
               ))}
-              {loading && (
+              {loading && messages[messages.length - 1]?.content === '' && (
                 <div className="message-row assistant">
                   <div className="message-avatar">Z</div>
                   <div className="message-content">
