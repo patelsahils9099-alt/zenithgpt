@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -73,6 +74,34 @@ async def chat(request: ChatRequest):
         return ChatResponse(reply=reply)
     except Exception as e:
         return ChatResponse(reply="", error=str(e))
+
+@app.post("/chat-stream")
+async def chat_stream(request: ChatRequest):
+    system_prompts = {
+        "general": "You are ZenithGPT, a helpful AI assistant.",
+        "health": "You are a medical expert AI. Always remind users to consult a doctor.",
+        "code": "You are an expert programmer.",
+        "writing": "You are an expert writer.",
+        "data": "You are a data science expert."
+    }
+    system_message = system_prompts.get(request.mode, system_prompts["general"])
+    messages = [{"role": "system", "content": system_message}]
+    messages.extend(request.history)
+    messages.append({"role": "user", "content": request.message})
+    
+    def generate():
+        stream = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            max_tokens=1024,
+            stream=True
+        )
+        for chunk in stream:
+            content = chunk.choices[0].delta.content
+            if content:
+                yield content
+    
+    return StreamingResponse(generate(), media_type="text/plain")
 
 @app.post("/save-chat")
 async def save_chat(request: SaveChatRequest):

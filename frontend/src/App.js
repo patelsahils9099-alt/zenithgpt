@@ -82,7 +82,7 @@ function App() {
     } catch (e) {}
   };
 
-  const sendMessage = async (customInput) => {
+const sendMessage = async (customInput) => {
     const messageText = customInput || input;
     if (!messageText.trim() || loading) return;
     const userMsg = { role: 'user', content: messageText };
@@ -90,20 +90,30 @@ function App() {
     setMessages(newMsgs);
     setInput('');
     setLoading(true);
+    
     try {
-      const r = await fetch(API_URL + '/chat', {
+      const response = await fetch(API_URL + '/chat-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: messageText, mode: mode, history: messages })
       });
-      const d = await r.json();
-      if (d.error) {
-        setMessages([...newMsgs, { role: 'assistant', content: 'Error: ' + d.error }]);
-      } else {
-        const final = [...newMsgs, { role: 'assistant', content: d.reply }];
-        setMessages(final);
-        saveChat(final);
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantMsg = '';
+      
+      setMessages([...newMsgs, { role: 'assistant', content: '' }]);
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        assistantMsg += chunk;
+        setMessages([...newMsgs, { role: 'assistant', content: assistantMsg }]);
       }
+      
+      const final = [...newMsgs, { role: 'assistant', content: assistantMsg }];
+      saveChat(final);
     } catch (e) {
       setMessages([...newMsgs, { role: 'assistant', content: 'Connection error.' }]);
     } finally {
