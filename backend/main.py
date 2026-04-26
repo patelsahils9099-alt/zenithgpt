@@ -22,25 +22,21 @@ app.add_middleware(
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
+class ChatRequest(BaseModel):
+    message: str
+    mode: str = "general"
+    history: list = []
+
+class ChatResponse(BaseModel):
+    reply: str
+    error: Optional[str] = None
+
 class SaveChatRequest(BaseModel):
     conversation_id: Optional[str] = None
     title: str
     messages: list
     mode: str = "general"
     user_id: Optional[str] = None
-
-class ChatResponse(BaseModel):
-    reply: str
-    error: Optional[str] = None
-
-    conversation_id: Optional[str] = None
-    title: str
-    messages: list
-    mode: str = "general"class SaveChatRequest(BaseModel):
-    conversation_id: Optional[str] = None
-    title: str
-    messages: list
-    mode: str = "general"
 
 class UpdateChatRequest(BaseModel):
     title: Optional[str] = None
@@ -112,11 +108,7 @@ async def save_chat(request: SaveChatRequest):
                 "title": request.title,
                 "mode": request.mode
             }).eq("id", request.conversation_id).execute()
-                    result = supabase.table("conversations").insert({
-                "title": request.title,
-                "messages": request.messages,
-                "mode": request.mode
-            }).execute()else:
+        else:
             result = supabase.table("conversations").insert({
                 "title": request.title,
                 "messages": request.messages,
@@ -127,13 +119,8 @@ async def save_chat(request: SaveChatRequest):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-async def get_conversations():
-    try:
-        result = supabase.table("conversations").select("*").order("updated_at", desc=True).execute()
-        return {"conversations": result.data}
-    except Exception as e:
-        return {"conversations": [], "error": str(e)}@app.get("/conversations")
-async def get_conversations():
+@app.get("/conversations")
+async def get_conversations(user_id: Optional[str] = None):
     try:
         query = supabase.table("conversations").select("*").order("updated_at", desc=True)
         if user_id:

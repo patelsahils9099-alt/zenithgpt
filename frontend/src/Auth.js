@@ -6,14 +6,13 @@ function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState('login'); // 'login', 'signup', 'forgot'
+  const [mode, setMode] = useState('login');
   const [message, setMessage] = useState('');
 
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-    
     try {
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({ email, password });
@@ -36,52 +35,30 @@ function Auth() {
     }
   };
 
+  const updateEmail = (e) => setEmail(e.target.value);
+  const updatePassword = (e) => setPassword(e.target.value);
+
   return (
     <div className="auth-container">
       <div className="auth-card">
         <h1 className="auth-logo">⚡ ZenithGPT</h1>
         <p className="auth-subtitle">
-          {mode === 'signup' ? 'Create your account' : 
-           mode === 'forgot' ? 'Reset your password' : 
-           'Welcome back'}
+          {mode === 'signup' ? 'Create your account' : mode === 'forgot' ? 'Reset your password' : 'Welcome back'}
         </p>
-        
         <form onSubmit={handleAuth}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="auth-input"
-          />
+          <input type="email" placeholder="Email" value={email} onChange={updateEmail} required className="auth-input" />
           {mode !== 'forgot' && (
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="auth-input"
-            />
+            <input type="password" placeholder="Password" value={password} onChange={updatePassword} required minLength={6} className="auth-input" />
           )}
           <button type="submit" disabled={loading} className="auth-button">
-            {loading ? 'Loading...' : 
-             mode === 'signup' ? 'Sign Up' : 
-             mode === 'forgot' ? 'Send Reset Link' : 
-             'Log In'}
+            {loading ? 'Loading...' : mode === 'signup' ? 'Sign Up' : mode === 'forgot' ? 'Send Reset Link' : 'Log In'}
           </button>
         </form>
-
         {message && <p className="auth-message">{message}</p>}
-
         <div className="auth-links">
           {mode === 'login' && (
             <>
-              <button onClick={() => { setMode('forgot'); setMessage(''); }} className="auth-link">
-                Forgot password?
-              </button>
+              <button onClick={() => { setMode('forgot'); setMessage(''); }} className="auth-link">Forgot password?</button>
               <p className="auth-toggle">
                 Don't have an account?
                 <button onClick={() => { setMode('signup'); setMessage(''); }} className="auth-link"> Sign Up</button>
