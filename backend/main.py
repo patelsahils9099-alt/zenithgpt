@@ -120,11 +120,10 @@ async def save_chat(request: SaveChatRequest):
         return {"success": False, "error": str(e)}
 
 @app.get("/conversations")
-async def get_conversations(user_id: Optional[str] = None):
+async def get_conversations(user_id: str):
     try:
         query = supabase.table("conversations").select("*").order("updated_at", desc=True)
-        if user_id:
-            query = query.eq("user_id", user_id)
+        query = query.eq("user_id", user_id)
         result = query.execute()
         return {"conversations": result.data}
     except Exception as e:
