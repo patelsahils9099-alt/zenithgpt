@@ -9,3 +9,7 @@ frontend/build/
 frontend/node_modules/
 *.backup
 *.broken
+*.working
+.claude/
+.idea/
+.vscode/
