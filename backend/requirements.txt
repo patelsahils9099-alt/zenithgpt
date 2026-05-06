@@ -4,3 +4,7 @@ groq
 python-dotenv
 pydantic
 supabase
+pypdf
+python-docx
+python-pptx
+openpyxl
