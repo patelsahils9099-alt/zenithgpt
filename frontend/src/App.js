@@ -257,10 +257,15 @@ function App() {
     const messageText = customInput || input;
     if ((!messageText.trim() && attachments.length === 0) || loading) return;
     const attachmentsToSend = attachments;
-    const displayContent = attachmentsToSend.length
-      ? messageText + (messageText ? '\n' : '') + attachmentsToSend.map(a => `📎 ${a.name}`).join('\n')
-      : messageText;
-    const userMsg = { role: 'user', content: displayContent };
+    const userMsg = {
+      role: 'user',
+      content: messageText,
+      attachments: attachmentsToSend.map(a => ({
+        type: a.type,
+        name: a.name,
+        data: a.type === 'image' ? a.data : null,
+      })),
+    };
     const newMsgs = [...messages, userMsg];
     const convIdAtStart = currentId;
     setMessages(newMsgs);
@@ -536,7 +541,29 @@ function App() {
                         </ReactMarkdown>
                       </div>
                     ) : (
-                      <div className="user-text">{m.content}</div>
+                      <div className="user-text">
+                        {m.attachments && m.attachments.length > 0 && (
+                          <div className="msg-attachments">
+                            {m.attachments.map((a, ai) => {
+                              const ext = (a.name.split('.').pop() || '').toUpperCase();
+                              const isImage = a.type === 'image' && a.data;
+                              return (
+                                <div key={ai} className={`msg-attach-card ${isImage ? 'is-image' : ''}`}>
+                                  {isImage ? (
+                                    <img src={a.data} alt={a.name} className="msg-attach-thumb" />
+                                  ) : (
+                                    <>
+                                      <div className="msg-attach-name">{a.name}</div>
+                                      <div className="msg-attach-badge">{ext}</div>
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {m.content && <div className="user-text-body">{m.content}</div>}
+                      </div>
                     )}
                     {m.role === 'assistant' && !loading && (
                       <div className="message-actions">
