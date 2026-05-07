@@ -92,6 +92,18 @@ ATTACHMENT_GUIDANCE = (
     "the user to re-upload or describe what's in the file."
 )
 
+IMAGE_GUIDANCE = (
+    "\n\nWhen the user uploads an image, describe what you actually see in concrete, "
+    "specific detail. Comment on anything notable: people (appearance, expression, posture), "
+    "skin condition (acne, redness, scars, dryness — name what you observe), objects, text, "
+    "setting, lighting, colors, and context. Don't be vague or generic. Don't refuse to "
+    "comment on visible health or skin observations — describe what you see and let the user "
+    "decide if they want medical advice. Skip phrases like 'Is there something specific you "
+    "would like to know about the image?' — just describe what you see and wait for the "
+    "user's follow-up. If the image is unclear or you can't tell what something is, say so "
+    "honestly rather than making things up."
+)
+
 SYSTEM_PROMPTS = {
     "general": (
         "You are ZenithGPT, a thoughtful and direct AI assistant.\n\n"
@@ -218,7 +230,12 @@ def extract_text_from_file(name: str, data_url: str) -> str:
 def build_messages(request: ChatRequest):
     base = SYSTEM_PROMPTS.get(request.mode, SYSTEM_PROMPTS["general"])
     has_attachments = bool(request.attachments)
-    system_message = base + (ATTACHMENT_GUIDANCE if has_attachments else "")
+    has_image = any(a.type == "image" for a in request.attachments)
+    system_message = base
+    if has_attachments:
+        system_message += ATTACHMENT_GUIDANCE
+    if has_image:
+        system_message += IMAGE_GUIDANCE
     messages = [{"role": "system", "content": system_message}]
     messages.extend(request.history)
 
