@@ -600,19 +600,25 @@ function App() {
         <div className="input-wrapper">
           {attachments.length > 0 && (
             <div className="attachment-row">
-              {attachments.map((a, i) => (
-                <div key={i} className="attachment-chip">
-                  {a.type === 'image' ? (
-                    <img src={a.data} alt={a.name} className="attachment-thumb" />
-                  ) : (
-                    <FileText size={16} />
-                  )}
-                  <span className="attachment-name">{a.name}</span>
-                  <button className="attachment-remove" onClick={() => removeAttachment(i)} title="Remove">
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
+              {attachments.map((a, i) => {
+                const ext = (a.name.split('.').pop() || '').toUpperCase();
+                const isImage = a.type === 'image';
+                return (
+                  <div key={i} className={`input-attach-card ${isImage ? 'is-image' : ''}`}>
+                    {isImage ? (
+                      <img src={a.data} alt={a.name} className="input-attach-thumb" />
+                    ) : (
+                      <>
+                        <div className="input-attach-name">{a.name}</div>
+                        <div className="input-attach-badge">{ext}</div>
+                      </>
+                    )}
+                    <button className="input-attach-remove" onClick={() => removeAttachment(i)} title="Remove">
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
           <div className="input-pill">

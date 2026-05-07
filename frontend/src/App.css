@@ -804,6 +804,71 @@ body {
   gap: 8px;
   margin-bottom: 8px;
 }
+.input-attach-card {
+  position: relative;
+  width: 180px;
+  height: 130px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--bg-input);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+.input-attach-card.is-image {
+  padding: 0;
+  border: none;
+}
+.input-attach-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+.input-attach-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding-right: 18px;
+}
+.input-attach-badge {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--border-strong);
+  color: var(--text-secondary);
+}
+.input-attach-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  cursor: pointer;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.input-attach-remove:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
 .attachment-chip {
   display: inline-flex;
   align-items: center;
