@@ -89,7 +89,12 @@ ATTACHMENT_GUIDANCE = (
     "Never say 'I can't access files' or 'I can't open attachments' when these markers "
     "are present; the content is already in front of you. If extraction returned an "
     "error placeholder (starts with '[Error' or '[Could not'), say so honestly and ask "
-    "the user to re-upload or describe what's in the file."
+    "the user to re-upload or describe what's in the file.\n\n"
+    "Skip robotic preamble. Don't start with 'The provided file is...', 'This document "
+    "contains...', 'The PowerPoint presentation (.pptx)...', or anything that restates "
+    "what the user already knows. Don't mention the file format — they can see the file "
+    "they uploaded. Just dive into the content directly: 'This presentation analyzes...', "
+    "'The document covers...', or even just start with the substance."
 )
 
 IMAGE_GUIDANCE = (
